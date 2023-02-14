@@ -1,0 +1,32 @@
+{
+  "name": "fsa-browserify",
+  "version": "1.1.0",
+  "description": "A browserify-compatible fs module using the HTML5 Filesystem API",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js"
+    },
+    "./promises": {
+      "import": "./lib/promises.js"
+    },
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shigma/fsa-browserify.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shigma/fsa-browserify/issues"
+  },
+  "homepage": "https://github.com/shigma/fsa-browserify",
+  "author": "Shigma <shigma10826@gmail.com>",
+  "keywords": [
+    "fs",
+    "filesystem",
+    "browserify"
+  ]
+}
