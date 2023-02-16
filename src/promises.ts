@@ -41,8 +41,8 @@ export async function writeFile(path: string, data: string, options: BufferEncod
   for (const segment of segments) {
     root = await root.getDirectoryHandle(segment, { create: true })
   }
-  const fileHandle = await root.getFileHandle(filename, { create: true })
-  const stream = await fileHandle.createWritable()
+  const handle = await root.getFileHandle(filename, { create: true })
+  const stream = await handle.createWritable()
   await stream.write(new TextEncoder().encode(data))
   await stream.close()
 }
@@ -54,10 +54,9 @@ export async function readFile(path: string, options: BufferEncoding) {
   for (const segment of segments) {
     root = await root.getDirectoryHandle(segment)
   }
-  const fileHandle = await root.getFileHandle(filename)
-  const stream = await fileHandle.getFile()
-  const data = await stream.text()
-  return data
+  const handle = await root.getFileHandle(filename)
+  const file = await handle.getFile()
+  return await file.text()
 }
 
 export async function readdir(path: string) {
@@ -77,7 +76,7 @@ export interface MakeDirectoryOptions {
   recursive?: boolean
 }
 
-export async function mkdir(path: string, options: MakeDirectoryOptions) {
+export async function mkdir(path: string, options?: MakeDirectoryOptions) {
   let root = await navigator.storage.getDirectory()
   const segments = path.split('/').filter(Boolean)
   for (const segment of segments) {
@@ -93,4 +92,34 @@ export async function unlink(path: string) {
     root = await root.getDirectoryHandle(segment)
   }
   await root.removeEntry(filename)
+}
+
+export interface StatOptions {}
+
+export async function arbitraryHandle(path: string) {
+  let handle: FileSystemHandle
+  let root = await navigator.storage.getDirectory()
+  const segments = path.split('/').filter(Boolean)
+  const filename = segments.pop()!
+  for (const segment of segments) {
+    root = await root.getDirectoryHandle(segment)
+  }
+  try {
+    handle = await root.getFileHandle(filename)
+  } catch {
+    handle = await root.getDirectoryHandle(filename)
+  }
+  return handle
+}
+
+export async function stat(path: string, options?: StatOptions) {
+  const handle = await arbitraryHandle(path)
+  return {
+    isFile: () => handle.kind === 'file',
+    isDirectory: () => handle.kind === 'directory',
+  }
+}
+
+export async function access(path: string, mode?: number) {
+  await arbitraryHandle(path)
 }
