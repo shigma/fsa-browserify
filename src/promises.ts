@@ -34,7 +34,7 @@ declare global {
   }
 }
 
-export async function writeFile(path: string, data: string, options: BufferEncoding) {
+export async function writeFile(path: string, data: string | ArrayBuffer | ArrayBufferView | Blob | DataView) {
   let root = await navigator.storage.getDirectory()
   const segments = path.split('/').filter(Boolean)
   const filename = segments.pop()!
@@ -43,11 +43,14 @@ export async function writeFile(path: string, data: string, options: BufferEncod
   }
   const handle = await root.getFileHandle(filename, { create: true })
   const stream = await handle.createWritable()
-  await stream.write(new TextEncoder().encode(data))
+  if (typeof data === 'string') {
+    data = new TextEncoder().encode(data)
+  }
+  await stream.write(data)
   await stream.close()
 }
 
-export async function readFile(path: string, options: BufferEncoding) {
+export async function readFile(path: string, options: 'utf8' | 'binary' = 'binary') {
   let root = await navigator.storage.getDirectory()
   const segments = path.split('/').filter(Boolean)
   const filename = segments.pop()!
@@ -56,7 +59,11 @@ export async function readFile(path: string, options: BufferEncoding) {
   }
   const handle = await root.getFileHandle(filename)
   const file = await handle.getFile()
-  return await file.text()
+  if (options === 'utf8') {
+    return await file.text()
+  } else {
+    return await file.arrayBuffer()
+  }
 }
 
 export async function readdir(path: string) {
@@ -91,7 +98,7 @@ export async function unlink(path: string) {
   for (const segment of segments) {
     root = await root.getDirectoryHandle(segment)
   }
-  await root.removeEntry(filename)
+  await root.removeEntry(filename, { recursive: true })
 }
 
 export interface StatOptions {}
