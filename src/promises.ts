@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer'
+
 declare global {
   interface FileSystemCreateWritableOptions {
     keepExistingData?: boolean
@@ -62,7 +64,7 @@ export async function readFile(path: string, options: 'utf8' | 'binary' = 'binar
   if (options === 'utf8') {
     return await file.text()
   } else {
-    return await file.arrayBuffer()
+    return Buffer.from(await file.arrayBuffer())
   }
 }
 
@@ -103,7 +105,7 @@ export async function unlink(path: string) {
 
 export interface StatOptions {}
 
-export async function arbitraryHandle(path: string) {
+export async function getHandle(path: string) {
   let handle: FileSystemHandle
   let root = await navigator.storage.getDirectory()
   const segments = path.split('/').filter(Boolean)
@@ -120,7 +122,7 @@ export async function arbitraryHandle(path: string) {
 }
 
 export async function stat(path: string, options?: StatOptions) {
-  const handle = await arbitraryHandle(path)
+  const handle = await getHandle(path)
   return {
     isFile: () => handle.kind === 'file',
     isDirectory: () => handle.kind === 'directory',
@@ -128,5 +130,5 @@ export async function stat(path: string, options?: StatOptions) {
 }
 
 export async function access(path: string, mode?: number) {
-  await arbitraryHandle(path)
+  await getHandle(path)
 }

@@ -1,6 +1,6 @@
 {
   "name": "fsa-browserify",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "A browserify-compatible fs module using the HTML5 Filesystem API",
   "exports": {
     ".": {
